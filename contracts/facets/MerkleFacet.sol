@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {MerkleProof} from "../utils/MerkleProof.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 import {Diamond} from "../Diamond.sol";
+import {ERC721Facet} from "./ERC721Facet.sol";
 
 contract MerkleFacet {
     error ZeroAddress();
@@ -42,7 +43,7 @@ contract MerkleFacet {
 
         ds.availableNfts -= 1;
 
-        Diamond._mint(msg.sender, _tokenId);
+        ERC721Facet(address(this)).safeMint(msg.sender, _tokenId);
 
         emit AirdropClaimed(msg.sender, block.timestamp, _tokenId);
     }

@@ -214,13 +214,8 @@ contract ERC721Facet is IERC721, ERC165, IERC721Metadata, IERC721Errors {
             revert ERC721InvalidSender(address(0));
         }
     }
-    /**
-     * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
-     * Returns the owner.
-     *
-     * Overrides to ownership logic should be done to {_ownerOf}.
-     */
-    function _safeMint(address to, uint256 tokenId) internal {
+
+    function safeMint(address to, uint256 tokenId) external {
         _safeMint(to, tokenId, "");
     }
 
