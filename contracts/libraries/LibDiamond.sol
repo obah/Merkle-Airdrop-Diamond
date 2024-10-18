@@ -21,6 +21,9 @@ library LibDiamond {
     error NonEmptyCalldata();
     error EmptyCalldata();
     error InitCallFailed();
+    error InsufficientAmount();
+    error MaxItemsExceeded();
+
     bytes32 constant DIAMOND_STORAGE_POSITION =
         keccak256("diamond.standard.diamond.storage");
 
@@ -59,7 +62,10 @@ library LibDiamond {
         bytes32 merkleRoot;
         uint256 endDate;
         mapping(address => bool) claimedAddresses;
-        uint8 availableNfts;
+        uint256 nftPrice;
+        uint256 totalSupply;
+        uint16 minPurchase;
+        uint16 maxPurchase;
     }
 
     function diamondStorage()

@@ -24,7 +24,6 @@ contract MerkleFacet {
         ds.nftAddress = _tokenAddress;
         ds.merkleRoot = _merkleRoot;
         ds.endDate = block.timestamp + _duration;
-        ds.availableNfts = 100;
     }
 
     function claimAirdrop(bytes32[] memory _merkleProof) external {
@@ -33,15 +32,15 @@ contract MerkleFacet {
         if (msg.sender == address(0)) revert ZeroAddress();
         if (ds.claimedAddresses[msg.sender] == true) revert UserClaimed();
         if (block.timestamp >= ds.endDate) revert AirdropEnded();
-        if (ds.availableNfts == 0) revert AirdropExhausted();
+        if (ds.totalSupply > 100) revert AirdropExhausted();
 
         verifyProof(_merkleProof, msg.sender);
 
+        ds.totalSupply += 1;
+
+        uint256 _tokenId = ds.totalSupply;
+
         ds.claimedAddresses[msg.sender] = true;
-
-        uint256 _tokenId = ds.availableNfts;
-
-        ds.availableNfts -= 1;
 
         ERC721Facet(address(this)).safeMint(msg.sender, _tokenId);
 
