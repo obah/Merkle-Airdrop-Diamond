@@ -47,6 +47,13 @@ library LibDiamond {
         mapping(bytes4 => bool) supportedInterfaces;
         // owner of the contract
         address contractOwner;
+        //ERC721 variables
+        string name;
+        string symbol;
+        mapping(uint256 tokenId => address) owners;
+        mapping(address owner => uint256) balances;
+        mapping(uint256 tokenId => address) tokenApprovals;
+        mapping(address owner => mapping(address operator => bool)) operatorApprovals;
     }
 
     function diamondStorage()
@@ -251,8 +258,8 @@ library LibDiamond {
                 .facetFunctionSelectors[_facetAddress]
                 .functionSelectors[lastSelectorPosition];
             ds.facetFunctionSelectors[_facetAddress].functionSelectors[
-                    selectorPosition
-                ] = lastSelector;
+                selectorPosition
+            ] = lastSelector;
             ds
                 .selectorToFacetAndPosition[lastSelector]
                 .functionSelectorPosition = uint96(selectorPosition);
