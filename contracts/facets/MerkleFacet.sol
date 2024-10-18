@@ -1,0 +1,84 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import {MerkleProof} from "../utils/MerkleProof.sol";
+import {IERC721} from "../interfaces/IERC721.sol";
+import {LibDiamond} from "../libraries/LibDiamond.sol";
+
+contract MerkleFacet {
+    error ZeroAddress();
+    error InvalidProof();
+    error UserClaimed();
+    error OnlyOwner();
+    error AirdropEnded();
+    error AirdropExhausted();
+
+    event AirdropClaimed(address indexed account, uint time, uint256 amount);
+
+    constructor(address _tokenAddress, bytes32 _merkleRoot, uint _duration) {
+        if (_tokenAddress == address(0)) revert ZeroAddress();
+
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
+        ds.nftAddress = _tokenAddress;
+        ds.merkleRoot = _merkleRoot;
+        ds.endDate = block.timestamp + _duration;
+        ds.tokenBalance = 100;
+    }
+
+    function claimAirdrop(bytes32[] memory _merkleProof) external {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
+        if (msg.sender == address(0)) revert ZeroAddress();
+        if (ds.claimedAddresses[msg.sender] == true) revert UserClaimed();
+        if (block.timestamp >= ds.endDate) revert AirdropEnded();
+        if (ds.tokenBalance == 0) revert AirdropExhausted();
+
+        verifyProof(_merkleProof, msg.sender);
+
+        ds.claimedAddresses[msg.sender] = true;
+
+        uint256 _tokenId = ds.tokenBalance;
+
+        ds.tokenBalance -= 1;
+
+        IERC721(ds.nftAddress).safeTransferFrom(
+            ds.contractOwner,
+            msg.sender,
+            _tokenId
+        );
+
+        emit AirdropClaimed(msg.sender, block.timestamp, _tokenId);
+    }
+
+    function verifyProof(
+        bytes32[] memory _proof,
+        address _account
+    ) private view {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
+        bytes32 leaf = keccak256(abi.encode(_account));
+
+        bool validProof = MerkleProof.verify(_proof, ds.merkleRoot, leaf);
+
+        if (!validProof) revert InvalidProof();
+    }
+
+    function updateMerkleRoot(bytes32 _merkleRoot) external {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
+        if (msg.sender != ds.contractOwner) revert OnlyOwner();
+
+        ds.merkleRoot = _merkleRoot;
+    }
+
+    // function withdraw(address _to) external {
+    //     LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
+    //     if (msg.sender != ds.contractOwner) revert OnlyOwner();
+    //     if (block.timestamp < ds.endDate) revert AirdropActive();
+    //     if (ds.balance == 0) revert AirdropExhausted();
+
+    //     TOKEN.transfer(_to, balance);
+    // }
+}

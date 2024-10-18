@@ -54,6 +54,12 @@ library LibDiamond {
         mapping(address owner => uint256) balances;
         mapping(uint256 tokenId => address) tokenApprovals;
         mapping(address owner => mapping(address operator => bool)) operatorApprovals;
+        //MerkleProof variables
+        address nftAddress;
+        bytes32 merkleRoot;
+        uint256 endDate;
+        mapping(address => bool) claimedAddresses;
+        uint8 tokenBalance;
     }
 
     function diamondStorage()
