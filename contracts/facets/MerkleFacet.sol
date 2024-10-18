@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import {MerkleProof} from "../utils/MerkleProof.sol";
-import {IERC721} from "../interfaces/IERC721.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
+import {Diamond} from "../Diamond.sol";
 
 contract MerkleFacet {
     error ZeroAddress();
@@ -13,7 +13,7 @@ contract MerkleFacet {
     error AirdropEnded();
     error AirdropExhausted();
 
-    event AirdropClaimed(address indexed account, uint time, uint256 amount);
+    event AirdropClaimed(address indexed account, uint time, uint256 tokenId);
 
     constructor(address _tokenAddress, bytes32 _merkleRoot, uint _duration) {
         if (_tokenAddress == address(0)) revert ZeroAddress();
@@ -23,7 +23,7 @@ contract MerkleFacet {
         ds.nftAddress = _tokenAddress;
         ds.merkleRoot = _merkleRoot;
         ds.endDate = block.timestamp + _duration;
-        ds.tokenBalance = 100;
+        ds.availableNfts = 100;
     }
 
     function claimAirdrop(bytes32[] memory _merkleProof) external {
@@ -32,21 +32,17 @@ contract MerkleFacet {
         if (msg.sender == address(0)) revert ZeroAddress();
         if (ds.claimedAddresses[msg.sender] == true) revert UserClaimed();
         if (block.timestamp >= ds.endDate) revert AirdropEnded();
-        if (ds.tokenBalance == 0) revert AirdropExhausted();
+        if (ds.availableNfts == 0) revert AirdropExhausted();
 
         verifyProof(_merkleProof, msg.sender);
 
         ds.claimedAddresses[msg.sender] = true;
 
-        uint256 _tokenId = ds.tokenBalance;
+        uint256 _tokenId = ds.availableNfts;
 
-        ds.tokenBalance -= 1;
+        ds.availableNfts -= 1;
 
-        IERC721(ds.nftAddress).safeTransferFrom(
-            ds.contractOwner,
-            msg.sender,
-            _tokenId
-        );
+        Diamond._mint(msg.sender, _tokenId);
 
         emit AirdropClaimed(msg.sender, block.timestamp, _tokenId);
     }
@@ -71,14 +67,4 @@ contract MerkleFacet {
 
         ds.merkleRoot = _merkleRoot;
     }
-
-    // function withdraw(address _to) external {
-    //     LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-    //     if (msg.sender != ds.contractOwner) revert OnlyOwner();
-    //     if (block.timestamp < ds.endDate) revert AirdropActive();
-    //     if (ds.balance == 0) revert AirdropExhausted();
-
-    //     TOKEN.transfer(_to, balance);
-    // }
 }

@@ -59,7 +59,7 @@ library LibDiamond {
         bytes32 merkleRoot;
         uint256 endDate;
         mapping(address => bool) claimedAddresses;
-        uint8 tokenBalance;
+        uint8 availableNfts;
     }
 
     function diamondStorage()
