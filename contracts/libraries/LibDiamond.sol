@@ -21,8 +21,6 @@ library LibDiamond {
     error NonEmptyCalldata();
     error EmptyCalldata();
     error InitCallFailed();
-    error InsufficientAmount();
-    error MaxItemsExceeded();
 
     bytes32 constant DIAMOND_STORAGE_POSITION =
         keccak256("diamond.standard.diamond.storage");

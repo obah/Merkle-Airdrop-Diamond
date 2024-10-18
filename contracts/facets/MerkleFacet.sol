@@ -16,10 +16,15 @@ contract MerkleFacet {
 
     event AirdropClaimed(address indexed account, uint time, uint256 tokenId);
 
-    constructor(address _tokenAddress, bytes32 _merkleRoot, uint _duration) {
+    function initialiseFacet(
+        address _tokenAddress,
+        bytes32 _merkleRoot,
+        uint _duration
+    ) external {
         if (_tokenAddress == address(0)) revert ZeroAddress();
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (msg.sender != ds.contractOwner) revert LibDiamond.NotDiamondOwner();
 
         ds.nftAddress = _tokenAddress;
         ds.merkleRoot = _merkleRoot;

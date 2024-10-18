@@ -12,11 +12,16 @@ import {Strings} from "../utils/Strings.sol";
 
 contract ERC721Facet is IERC721, ERC165, IERC721Metadata, IERC721Errors {
     using Strings for uint256;
-    constructor(string memory name_, string memory symbol_) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
-        ds.name = name_;
-        ds.symbol = symbol_;
+    function initialiseFacet(
+        string memory _name,
+        string memory _symbol
+    ) external {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (msg.sender != ds.contractOwner) revert LibDiamond.NotDiamondOwner();
+
+        ds.name = _name;
+        ds.symbol = _symbol;
     }
 
     function supportsInterface(
