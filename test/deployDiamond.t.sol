@@ -116,7 +116,7 @@ contract DiamondDeployer is Test, DiamondUtils, IDiamondCut {
     function testFailUnauthorizedTransfer() public {
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
-        inputs[1] = "../scripts/merkleRoot.ts";
+        inputs[1] = "..*/merkleRoot.ts";
         inputs[2] = vm.toString(claimer);
         bytes memory result = vm.ffi(inputs);
         bytes32[] memory proof = abi.decode(result, (bytes32[]));
