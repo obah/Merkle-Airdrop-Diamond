@@ -10,8 +10,8 @@ contract PresaleFacet {
 
     function initialisePresale(
         uint256 _price,
-        uint16 _minPurchase,
-        uint16 _maxPurchase
+        uint256 _minPurchase,
+        uint256 _maxPurchase
     ) external {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
